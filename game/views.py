@@ -15,20 +15,19 @@ def index(request):
                 new_session = form.save()
 
                 #make and populate the deck
+                # TODO: add deck selection to session creation form
                 deck = Player(nickname="Deck", is_deck=True, hand_size=99999, session=new_session)
                 deck.save()
 
                 all_cards = AllCards.objects.order_by("pk")
-                noun_cards = NounCard.objects.filter(in_hand=deck)
 
-                if(not noun_cards): # makes sure the deck isn't already populated
-                    for card in all_cards:
-                        if card.is_noun:
-                            new_card = NounCard(card_text=card.card_text, in_hand = deck)
-                            new_card.save()
-                        else:
-                            new_card = PromptCard(card_text=card.card_text, num_blanks=card.num_blanks, won_by=deck)
-                            new_card.save()
+                for card in all_cards:
+                    if card.is_noun:
+                        new_card = NounCard(card_text=card.card_text, in_hand = deck)
+                        new_card.save()
+                    else:
+                        new_card = PromptCard(card_text=card.card_text, num_blanks=card.num_blanks, won_by=deck)
+                        new_card.save()
             else: 
                 print("session form invalid")
 
@@ -38,7 +37,6 @@ def index(request):
     return render(request, 'game/index.html', {"session_list":session_list, "decks":deck_list})
 
 def game(request, session_pk):
-    deck = get_object_or_404(Player, is_deck=True, session=session_pk)
     player_list = Player.objects.filter(session=session_pk)
     new_player_form = NewPlayerForm
     if request.method == 'POST':
@@ -89,10 +87,10 @@ def judge(request, session_pk):
         # a player plays a card
         form = PlayCardForm(request.POST)
         if form.is_valid():
+            player = get_object_or_404(Player, pk=form.cleaned_data["player"])
             if not player.has_played: # makes sure player doesn't play twice
                 noun_card = get_object_or_404(NounCard, pk=form.cleaned_data["noun_card"])
-                prompt_card = get_object_or_404(PromptCard, pk=form.cleaned_data["prompt_card"])
-                player = get_object_or_404(Player, pk=form.cleaned_data["player"])
+                prompt_card = get_object_or_404(PromptCard, pk=form.cleaned_data["prompt_card"])               
 
                 noun_card.with_prompt = prompt_card
                 noun_card.save()
@@ -115,7 +113,7 @@ def judge(request, session_pk):
     noun_cards = NounCard.objects.filter(with_prompt=prompt_card)
     
     if "judge-button" in request.POST:
-        # the judge chooses a winner
+        # the judge chooses a winner, retires the prompt card
         winning_card_pk = request.POST["winning_card"]
         winning_card = get_object_or_404(NounCard, pk=winning_card_pk)
         winning_player = winning_card.in_hand
@@ -179,11 +177,13 @@ def fill_hands(player_list, deck):
     # fills players hands up to card limit
      for player in player_list:
             if player != deck:
-                num_of_cards = len(NounCard.objects.filter(in_hand = player))
-                for x in range(num_of_cards, player.hand_size):
-                    deck_cards = (NounCard.objects.filter(in_hand = deck))
-                    if len(deck_cards) > 0:
-                        rand_pos = randint(0, len(deck_cards))
-                        card = deck_cards[rand_pos]
-                        card.in_hand = player
-                        card.save()
+                cards_left = len(NounCard.objects.filter(in_hand = deck))
+                if cards_left > 0:
+                    num_of_cards = len(NounCard.objects.filter(in_hand = player))
+                    for x in range(num_of_cards, player.hand_size):
+                        deck_cards = (NounCard.objects.filter(in_hand = deck))
+                        if len(deck_cards) > 0:
+                            rand_pos = randint(0, len(deck_cards))
+                            card = deck_cards[rand_pos]
+                            card.in_hand = player
+                            card.save()
