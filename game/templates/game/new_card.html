@@ -1,0 +1,22 @@
+{% block new_card %}
+<div id="new-card-zone">
+    <form id="new-card-form"> 
+        {% csrf_token %}
+            <h2>Make a new card!</h2>
+            <label for="card_text">New Card Text</label><br>
+            <textarea rows="3" cols="25" id="new-card" name="card_text" required></textarea>
+            <div id="new-card-details">
+                <input type="radio" id="noun-card" name="is_noun"  value="true" checked><label for="noun-card">Noun Card</label>
+                <input type="radio" id="prompt-card" name="is_noun" value="false"><label for="prompt-card">Prompt Card</label> <br>
+                <label for="deck">Deck</label>
+                <select name="deck" id="deck-select">
+                    {% for deck in decks %}
+                    <option name="deck" value="{{deck.pk}}">{{deck.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button id="new-card-submit" type="submit">Submit</button>
+        </form> 
+    </div>
+</div>
+{% endblock %}

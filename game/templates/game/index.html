@@ -1,0 +1,20 @@
+{% extends 'game/base.html' %}
+{% load static %}
+{% block content %}
+        {% if session_list %}
+            <p>Join a prexisting session:</p> 
+            {% for session in session_list %} 
+                <a href="{% url 'game' session.pk %}">{{session.name}}</a><br>
+            {% endfor %}
+            <p>Or make your own:</p>
+        {% else %}
+            <p>
+                It looks like there aren't any sessions, start a new one?
+            </p>
+        {% endif %}
+        <form method="POST" action="{% url 'index' %}">
+            {% csrf_token %}
+            <label for="name">Session name: </label><input type="text" name="name">
+            <button id="start" name="start" value="start" type="submit">Start a new session</button>
+        </form>
+{% endblock %}

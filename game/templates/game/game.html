@@ -1,0 +1,30 @@
+{% extends 'game/base.html' %}
+{% load static %}
+{% block content %}
+    {% if players %} 
+        {% for player, hand in players.items %} 
+            <h1>{{ player }} is ready to play!</h1>
+            {% if player.nickname == "Deck" %}
+            <div class="card-box">
+                    {% for card in hand %}  
+                        <span class="card-block">
+                        <span class="card" for="card-{{card.pk}}">{{ card.card_text }}</span>
+                        </span>
+                    {% endfor %}
+                    </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <br>
+    <form method="POST" action="{% url 'game' session %}">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="input-field">
+            {{ form.nickname.errors }}
+            <label for="name">Player name: </label>
+            <input type="text" name="nickname" max_length="50" required>
+        </div>
+        <button id="join" name="join" value="join" type="submit">Join Game</button>
+        <a class="button" href="{% url 'play' session %}">Play</a>
+    </form>
+{% endblock %}

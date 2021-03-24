@@ -1,0 +1,39 @@
+{% extends 'game/base.html' %}
+{% load static %}
+{% block content %}
+    <p>Prompt Card:</p>
+    <div class="card-box">
+    <div class="card-block">
+        <span class="card">{{ prompt_card.card_text }}</span>
+    </div></div>
+    {% if judge_time %}
+        <form method="POST" action="{% url 'judge' session %}"> {% csrf_token %}
+            <div class="card-box">
+            {% for card in noun_cards %} 
+            <span class="card-block">
+                <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
+                <input class="card-radio" type="radio" id="card-{{card.pk}}" name="winning_card" value="{{card.pk}}" required>
+            </span>
+        {% endfor %}
+    </div>
+        <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
+    </form>
+    {% elif end_round %}
+    <br>
+        <p>Winning Card:</p>
+        <span class="card-block">
+            <span class="card" for="card-{{card.pk}}">{{ winning_card.card_text }}</span>
+            <span class="winning_player">{{winning_player}}</span>
+            <a class="button" href="{% url 'play' session%}">Next Round</a>
+        </span>
+    {% else %}
+        <div class="card-box">
+        {% for card in noun_cards %} 
+            <span class="card-block">
+                <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
+            </span>
+        {% endfor %}
+        
+        </div><a class="button" href="{% url 'play' session%}">Back</a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,67 @@
+body{
+    padding: 0vw 2vw 0vw 2vw;
+}
+
+#main-content{
+    width: 79%;
+}
+
+#sidebar{
+    border-left: 2px solid black;
+    padding: 0.5em;
+    width: 20%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card{
+    display: block;
+    width: 10em;
+    height: 15em;
+    border: 2px solid black;
+    padding: 0.75em 0.5em 0.75em 0.5em;
+    text-align: center;
+}
+
+.card-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+.card-block{
+    display: inline-block;
+    margin: .5em;
+}
+
+.hide{
+    display:none;
+}
+
+#site-title{
+    font-size: 3em;
+}
+
+#all-of-it{
+    display: flex;
+    flex-direction: row;
+    justify-content:space-between;
+}
+
+#chat-zone{
+    position:relative;
+    height: 50vh;
+    box-sizing: border-box;
+}
+
+#chat{
+    height:90%;
+    overflow:auto;  
+    border: 2px solid grey;
+}
+
+#chatlog{
+    width:100%;
+}
+
+
