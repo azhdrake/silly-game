@@ -14,7 +14,7 @@
                 xhr.setRequestHeader("X-CSRFToken", csrf);
             }
         });
-        
+
         $.ajax({
             url:"{% url 'create_card' %}",
             type: "POST",
@@ -24,11 +24,8 @@
             success: function(response){
                 $("#new-card-form").trigger('reset')
                 $('#card-text').focus();
-                console.log("my god it worked");
             },
-
             error: function(response){
-                
             }
         })
     };

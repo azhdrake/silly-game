@@ -13,6 +13,7 @@
                     {% for deck in decks %}
                     <option name="deck" value="{{deck.pk}}">{{deck.name}}</option>
                     {% endfor %}
+                    <!-- TODO: add num_blank option when "prompt card" is selected -->
                 </select>
             </div>
             <button id="new-card-submit" type="submit">Submit</button>

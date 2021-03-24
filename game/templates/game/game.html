@@ -25,6 +25,8 @@
             <input type="text" name="nickname" max_length="50" required>
         </div>
         <button id="join" name="join" value="join" type="submit">Join Game</button>
+        {% if players|length >= 3 %}
         <a class="button" href="{% url 'play' session %}">Play</a>
+        {% endif %}
     </form>
 {% endblock %}
