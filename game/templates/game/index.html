@@ -15,6 +15,11 @@
         <form method="POST" action="{% url 'index' %}">
             {% csrf_token %}
             <label for="name">Session name: </label><input type="text" name="name">
+            <div class="checkbox-field"> 
+                {% for deck in decks %}
+                    <label for="{{ deck.name }}-checkbox">{{ deck.name }}</label><input type="checkbox" id="{{ deck.name }}-checkbox" name="decks" value="{{ deck.pk }}" {% if deck.pk is 1 %} checked="true" {% endif %}>
+                {% endfor %}
+            </div>
             <button id="start" name="start" value="start" type="submit">Start a new session</button>
             <!-- TODO: Add deck selection -->
         </form>

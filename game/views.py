@@ -13,21 +13,28 @@ def index(request):
             form = NewSessionForm(request.POST)
             if form.is_valid():
                 new_session = form.save()
-
+                
                 #make and populate the deck
-                # TODO: add deck selection to session creation form
+                session_decks = dict(request.POST)["decks"]
+                deck_pks = []
+                for select_deck in session_decks:
+                    deck_pks.append(select_deck)
+                
                 deck = Player(nickname="Deck", is_deck=True, hand_size=99999, session=new_session)
                 deck.save()
 
-                all_cards = AllCards.objects.order_by("pk")
+                all_cards = []
+                for deck_pk in deck_pks:
+                    all_cards.append(AllCards.objects.filter(deck=deck_pk))
 
-                for card in all_cards:
-                    if card.is_noun:
-                        new_card = NounCard(card_text=card.card_text, in_hand = deck)
-                        new_card.save()
-                    else:
-                        new_card = PromptCard(card_text=card.card_text, num_blanks=card.num_blanks, won_by=deck)
-                        new_card.save()
+                for card_set in all_cards:
+                    for card in card_set:
+                        if card.is_noun:
+                            new_card = NounCard(card_text=card.card_text, in_hand = deck)
+                            new_card.save()
+                        else:
+                            new_card = PromptCard(card_text=card.card_text, num_blanks=card.num_blanks, won_by=deck)
+                            new_card.save()
             else: 
                 print("session form invalid")
 
