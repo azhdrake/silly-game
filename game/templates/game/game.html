@@ -3,21 +3,27 @@
 {% block content %}
     {% if players %} 
         {% for player, hand in players.items %} 
-            <h1>{{ player }} is ready to play!</h1>
-            {% if player.nickname == "Deck" %}
-            <div class="card-box">
-                    {% for card in hand %}  
-                        <span class="card-block">
-                        <span class="card" for="card-{{card.pk}}">{{ card.card_text }}</span>
-                        </span>
-                    {% endfor %}
-                    </div>
+            {% if active_player and player == active_player %}
+                <h1>You, {{ player.nickname }}, are ready to play!</h1>
+            {% else %}
+                <h1>{{ player.nickname }} is ready to play!</h1>
+                {% if player.nickname == "Deck" %}
+                <div class="card-box">
+                        {% for card in hand %}  
+                            <span class="card-block">
+                            <span class="card" for="card-{{card.pk}}">{{ card.card_text }}</span>
+                            </span>
+                        {% endfor %}
+                        </div>
+                {% endif %}
             {% endif %}
         {% endfor %}
     {% endif %}
     <br>
+
     <form method="POST" action="{% url 'game' session %}">
         {% csrf_token %}
+        {% if not active_player %}
         {{ form.non_field_errors }}
         <div class="input-field">
             {{ form.nickname.errors }}
@@ -25,8 +31,10 @@
             <input type="text" name="nickname" max_length="50" required>
         </div>
         <button id="join" name="join" value="join" type="submit">Join Game</button>
-        {% if players|length >= 3 %}
+        {% endif %}
+        {% if players|length >= 4 %}
         <a class="button" href="{% url 'play' session %}">Play</a>
         {% endif %}
     </form>
+    
 {% endblock %}

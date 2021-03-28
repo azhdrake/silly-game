@@ -1,10 +1,15 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
+from django.contrib.sessions.models import Session as Cookie
 from .models import Player, PromptCard, NounCard, Session, Deck, AllCards
 from .forms import NewNounCardForm, NewPromptCardForm, NewSessionForm, NewPlayerForm, NewCardForm, PlayCardForm
 from random import randint
 import urllib.parse
+
+CARD_SELECT = 0
+JUDGING = 1
+WINNER = 2
 
 def index(request):
     if request.method == 'POST':
@@ -38,33 +43,64 @@ def index(request):
             else: 
                 print("session form invalid")
 
+    # TODO: enable session deletion
+
     # get decks and sessions, render page
     deck_list = Deck.objects.order_by("pk")
     session_list = Session.objects.order_by("name")
+    if not request.session.exists(request.session.session_key):
+        request.session.create() 
     return render(request, 'game/index.html', {"session_list":session_list, "decks":deck_list})
 
 def game(request, session_pk):
     player_list = Player.objects.filter(session=session_pk)
     new_player_form = NewPlayerForm
+    active_player = None
+    need_judge = True
+
     if request.method == 'POST':
         if "join" in request.POST:
             # make a new player
             form = NewPlayerForm(request.POST)
             if form.is_valid():
                 new_player = form.save(commit = False)
+                player_cookie = Cookie.objects.get(session_key=request.session.session_key)
+                new_player.cookie = player_cookie
                 new_player.session = get_object_or_404(Session, pk=session_pk)
+
+                for player in player_list:
+                    if player.is_judge:
+                        need_judge = False
+                if need_judge:
+                    new_player.is_judge = True
+
                 new_player.save()
+                print(new_player)
 
     decks = Deck.objects.order_by("name")
     players = get_players(player_list)
-    return render(request, 'game/game.html', {'players':players, "decks":decks, "session":session_pk, "form":new_player_form})
+
+    for player in player_list:
+        current_cookie = Cookie.objects.get(session_key=request.session.session_key)
+        if player.cookie == current_cookie:
+            active_player = player
+    
+    return render(request, 'game/game.html', {"active_player":active_player, 'players':players, "decks":decks, "session":session_pk, "form":new_player_form})
 
 def play(request, session_pk):
+    prompt_card = None
     # sets up the play room 
     decks = Deck.objects.order_by("pk")
     deck = get_object_or_404(Player, is_deck=True, session=session_pk)
     prompt_cards = PromptCard.objects.filter(won_by=deck)
-    active_card = False
+    active_card = active_player = judge = None
+    is_judge = False
+    session = get_object_or_404(Session, pk=session_pk)
+    player_list = Player.objects.filter(session=session_pk)
+
+    for player in player_list:
+        if player.is_judge:
+            judge = player
 
     # checks for active prompt and activates one if needed 
     for card in prompt_cards:
@@ -72,22 +108,58 @@ def play(request, session_pk):
             prompt_card = card
             active_card = True
 
+    if session.game_stage == WINNER:
+        winning_card = get_object_or_404(NounCard, with_prompt=prompt_card)
+        winning_player = winning_card.in_hand
+
+        prompt_card.won_by = winning_player
+        prompt_card.is_active = False
+        prompt_card.save()
+        
+        session.game_stage = CARD_SELECT
+        session.save()
+
+        active_card = None
+
+        player_list = list(player_list)
+
+        judge_index = player_list.index(judge)
+        judge.is_judge = False
+        judge.save()
+        if judge_index + 1 < len(player_list):
+            judge = player_list[judge_index + 1]
+            judge.is_judge = True
+            judge.save()
+        else:
+            judge = player_list[1]
+            judge.is_judge = True
+            judge.save()
+
     if not active_card:
         card_pos = randint(0, len(prompt_cards) - 1)
         prompt_card = prompt_cards[card_pos]
         prompt_card.is_active = True
         prompt_card.save()
 
-    player_list = Player.objects.filter(session=session_pk)
     players = get_players(player_list)
 
     fill_hands(player_list, deck)
 
-    return render(request, 'game/play.html', {'players':players, "decks":decks, "prompt_card":prompt_card, "session":session_pk})
+    for player in player_list:
+        current_cookie = Cookie.objects.get(session_key=request.session.session_key)
+        if player.cookie == current_cookie:
+            active_player = player
+
+    player_list = list(player_list)
+
+    return render(request, 'game/play.html', {'active_player':active_player, 'players':players, "decks":decks, "prompt_card":prompt_card, "session":session_pk})
 
 def judge(request, session_pk):
-    prompt_card = None
+    player_list = Player.objects.filter(session=session_pk)
+    active_player = prompt_card = winning_card = winning_player = None
+    end_round = False
     deck = get_object_or_404(Player, is_deck=True, session=session_pk)
+    session = get_object_or_404(Session, pk=session_pk)
     play_card_form = PlayCardForm
 
     if "play-card" in request.POST:
@@ -101,6 +173,7 @@ def judge(request, session_pk):
 
                 noun_card.with_prompt = prompt_card
                 noun_card.save()
+
                 player.has_played = True
                 player.save()
         else: 
@@ -108,7 +181,7 @@ def judge(request, session_pk):
     
     # checks how many players have played
     players = Player.objects.filter(session=session_pk)
-    done_players = 1 # 1 for the deck
+    done_players = 2 # 1 for the deck, 1 for judge
 
     for player in players:
         if player.has_played:
@@ -117,23 +190,36 @@ def judge(request, session_pk):
     # gets cards for context
     if(not prompt_card):
         prompt_card = get_object_or_404(PromptCard, is_active=True, won_by=deck)
+
     noun_cards = NounCard.objects.filter(with_prompt=prompt_card)
-    
+
+    # initiate judging
+    if done_players >= len(players):
+        judge_time = True
+    else:
+        judge_time = False
+
+    if session.game_stage == WINNER:
+        judge_time = False
+        end_round = True
+
+        winning_card = get_object_or_404(NounCard, with_prompt=prompt_card)
+        winning_player = winning_card.in_hand
+
     if "judge-button" in request.POST:
         # the judge chooses a winner, retires the prompt card
+
         winning_card_pk = request.POST["winning_card"]
         winning_card = get_object_or_404(NounCard, pk=winning_card_pk)
         winning_player = winning_card.in_hand
-        winning_prompt = winning_card.with_prompt
 
-        winning_prompt.won_by = winning_player
-        winning_prompt.is_active = False
-        winning_prompt.save()
+        session.game_stage = WINNER
+        session.save()
 
         for card in noun_cards:
             # removes card from player hand and removes it's association with the prompt if it is not the winner
             card.in_hand = None
-            if not winning_card:
+            if card != winning_card:
                 card.with_prompt = None
             card.save()
 
@@ -141,14 +227,16 @@ def judge(request, session_pk):
             player.has_played = False
             player.save()
 
-        return render(request, 'game/judging.html', {"judge_time":False, "end_round":True, 'winning_player':winning_player, "prompt_card":winning_prompt, "winning_card":winning_card, "session":session_pk})
-    
-    # initiate judging
-    if done_players >= len(players):
-        return render(request, 'game/judging.html', {"judge_time":True, "end_round":False, "noun_cards":noun_cards, 'players':players, "prompt_card":prompt_card, "session":session_pk})
+        end_round = True
+        judge_time = False
 
+    for player in player_list:
+        current_cookie = Cookie.objects.get(session_key=request.session.session_key)
+        if player.cookie == current_cookie:
+            active_player = player
+            
     # waiting room
-    return render(request, 'game/judging.html', {"judge_time":False, "end_round":False, 'players':players, "prompt_card":prompt_card, "noun_cards":noun_cards, "session":session_pk, "form":play_card_form})
+    return render(request, 'game/judging.html', {"active_player":active_player, "judge_time":judge_time, "end_round":end_round, 'winning_player':winning_player, "winning_card":winning_card, 'players':players, "prompt_card":prompt_card, "noun_cards":noun_cards, "session":session_pk, "form":play_card_form})
 
 def create_card(request):
     if request.is_ajax and request.method == 'POST':
@@ -190,7 +278,7 @@ def fill_hands(player_list, deck):
                     for x in range(num_of_cards, player.hand_size):
                         deck_cards = (NounCard.objects.filter(in_hand = deck))
                         if len(deck_cards) > 0:
-                            rand_pos = randint(0, len(deck_cards))
+                            rand_pos = randint(0, len(deck_cards) - 1)
                             card = deck_cards[rand_pos]
                             card.in_hand = player
                             card.save()

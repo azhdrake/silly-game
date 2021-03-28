@@ -1,0 +1,49 @@
+{% block judge_javascript %}
+<script>
+    
+    /***************************  
+          Judgeing Stuff 
+    ****************************/ 
+
+    {% if active_player.is_judge %}
+    if(location.pathname.includes("/play/")){
+        window.location.href = "{% url 'judge' session %}"
+    }
+    {% endif %}
+
+    session_id = "{{ session }}"
+
+    if(session_id){
+        const JudgeSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/judge/'
+            + session_id
+            + '/'
+        );
+
+        JudgeSocket.onmessage = function(event){
+            if(location.pathname.includes("/judging/")){
+                window.location.href = "{% url 'judge' session %}"
+            }
+        }
+
+        JudgeSocket.onclose = function(event){
+            console.error("Judge socket closed unexpectedly");
+        }
+
+        $("#play-button").on('click', function(event){
+            JudgeSocket.send(JSON.stringify({
+                "message":"refresh"
+            }));
+        })
+
+        $("#judge-button").on('click', function(event){
+            JudgeSocket.send(JSON.stringify({
+                "message":"refresh"
+            }));
+        })
+    }
+
+</script>
+{% endblock %}

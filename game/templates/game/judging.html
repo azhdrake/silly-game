@@ -16,15 +16,17 @@
             </span>
         {% endfor %}
     </div>
-        <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
-    </form>
+        {% if active_player.is_judge %}
+            <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
+        </form>
+        {% endif %}
     {% elif end_round %}
     <br>
         <p>Winning Card:</p>
         <span class="card-block">
             <span class="card" for="card-{{card.pk}}">{{ winning_card.card_text }}</span>
             <span class="winning_player">{{winning_player}}</span>
-            <a class="button" href="{% url 'play' session%}">Next Round</a>
+            <a class="button" method="POST" name="prev_round" value="{{winning_card.pk}}" href="{% url 'play' session %}">Next Round</a>
         </span>
     {% else %}
         <div class="card-box">
@@ -34,6 +36,7 @@
             </span>
         {% endfor %}
         
-        </div><a class="button" href="{% url 'play' session%}">Back</a>
+        </div><a class="button" href="{% url 'play' session %}">Back</a>
     {% endif %}
+    {% include "game/judge_js.html" %}
 {% endblock %}

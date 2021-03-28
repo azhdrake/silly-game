@@ -4,28 +4,11 @@
         Game Chat
     </div>
     <div id="chat">
-    
-    <table id="chatlog">
-        <tr id="table-headers">
-            <th>Nickname</th>
-            <th>Comment</th>
-        </tr>
-    {% if session %}
-        {% if comment_log %}
-        {% for comment in comment_log %}   
-            <tr>
-                <td>{{ comment.poster}}</td>
-                <td>{{ comment.text }}</td>
-            </tr>
-        {% endfor %}
+        <textarea id="chat-log" disabled></textarea><br>
+        {% if session %}
+            <input id="chat-input" class="add-comment" value="Say Something"><button id="post-comment-button">Post</button>
+        {% else %}
+            <input class="add-comment" value="Join a Session to Chat" disabled> <button id="post-comment-button">Post</button>
         {% endif %}
-    </table>
     </div>
-    <input class="add-comment" value="Say Something"><button id="post-comment-button">Post</button>
-    {% else %}
-    </table>
-    </div>
-        <input class="add-comment" value="Join a Session to Chat" disabled> <button id="post-comment-button">Post</button>
-    {% endif %}
-</div>
 {% endblock %}

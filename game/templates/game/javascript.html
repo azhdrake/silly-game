@@ -1,5 +1,8 @@
 {% block javascript %}
 <script>
+    /***************************  
+              NEW CARD 
+    ****************************/ 
     $(document).on('submit', '#new-card-form', function(event){
         event.preventDefault();
         let serializedData = $(this).serialize();
@@ -29,5 +32,47 @@
             }
         })
     };
+
+    /***************************  
+            CHAT CLIENT 
+    ****************************/ 
+
+    const session_id = "{{ session }}"
+
+    if(session_id){
+        const chatSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + session_id
+            + '/'
+        );
+
+        chatSocket.onmessage = function(event){
+            const data = JSON.parse(event.data);
+            $("#chat-log").val(function(){
+                return this.value + data.message + '\n'
+            });
+        }
+
+        chatSocket.onclose = function(event){
+            console.error("chat socket closed unexpectedly");
+        }
+
+        $("#chat-input").on('keypress', function(event){
+            if(event.which == 13){
+                $("#post-comment-button").click();
+            }
+        });
+
+        $("#post-comment-button").on('click', function(event){
+            const message = $("#chat-input").val();
+            chatSocket.send(JSON.stringify({
+                "message":message
+            }));
+            $("#chat-input").val("");
+        })
+    }
+
 </script>
 {% endblock %}

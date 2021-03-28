@@ -1,9 +1,11 @@
 from django.db import models
 from django.db.models.aggregates import Count
 from random import randint
+from django.contrib.sessions.models import Session as Cookie
 
 class Session(models.Model):
     name = models.CharField(max_length = 50)
+    game_stage = models.IntegerField(default=0)
     def __str__(self):
         return self.name
 
@@ -13,6 +15,7 @@ class Deck(models.Model):
         return self.name
 
 class Player(models.Model):
+    cookie = models.ForeignKey(Cookie, on_delete=models.CASCADE, blank = True, null = True)
     nickname = models.CharField(max_length = 50)
     is_deck = models.BooleanField(default = False)
     is_judge = models.BooleanField(default = False)

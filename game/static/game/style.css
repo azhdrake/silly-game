@@ -60,8 +60,9 @@ body{
     border: 2px solid grey;
 }
 
-#chatlog{
-    width:100%;
+#chat-log{
+    width:99%;
+    height:90%;
 }
 
 
