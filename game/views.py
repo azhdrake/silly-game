@@ -42,8 +42,12 @@ def index(request):
                             new_card.save()
             else: 
                 print("session form invalid")
+        elif "delete-session" in request.POST:
+            # delete an existing session.
+            session_pk = dict(request.POST)["delete-session"][0]
 
-    # TODO: enable session deletion
+            get_object_or_404(Session, pk=session_pk).delete()
+            
 
     # get decks and sessions, render page
     deck_list = Deck.objects.order_by("pk")
@@ -155,6 +159,7 @@ def play(request, session_pk):
     return render(request, 'game/play.html', {'active_player':active_player, 'players':players, "decks":decks, "prompt_card":prompt_card, "session":session_pk})
 
 def judge(request, session_pk):
+    decks = Deck.objects.order_by("pk")
     player_list = Player.objects.filter(session=session_pk)
     active_player = prompt_card = winning_card = winning_player = None
     end_round = False
@@ -236,7 +241,7 @@ def judge(request, session_pk):
             active_player = player
             
     # waiting room
-    return render(request, 'game/judging.html', {"active_player":active_player, "judge_time":judge_time, "end_round":end_round, 'winning_player':winning_player, "winning_card":winning_card, 'players':players, "prompt_card":prompt_card, "noun_cards":noun_cards, "session":session_pk, "form":play_card_form})
+    return render(request, 'game/judging.html', {"active_player":active_player, "decks":decks, "judge_time":judge_time, "end_round":end_round, 'winning_player':winning_player, "winning_card":winning_card, 'players':players, "prompt_card":prompt_card, "noun_cards":noun_cards, "session":session_pk, "form":play_card_form})
 
 def create_card(request):
     if request.is_ajax and request.method == 'POST':

@@ -11,7 +11,7 @@
     <body>
     
         <div id="header">
-            <span id="site-title">A Very Silly Game</span>
+            <span id="site-title">A Very Silly Game</span><br>
             <a class="header-link" href="{% url 'index' %}">Session Select</a>
         </div>
         <div id="all-of-it">
@@ -19,11 +19,11 @@
                 {% block content %}
                 {% endblock %}
             </div>
-        <div id="sidebar">
-            {% include "game/chat.html" %}
-            {% include "game/new_card.html" %}
+            <div id="sidebar">
+                {% include "game/chat.html" %}
+                {% include "game/new_card.html" %}
+            </div>
         </div>
-    </div>
     {% include "game/javascript.html" %}
     </body>
 </html>

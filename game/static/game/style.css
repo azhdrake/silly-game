@@ -1,26 +1,403 @@
-body{
-    padding: 0vw 2vw 0vw 2vw;
+body, html{
+    background-color: #2a233b;
+    color: #b0aeb4;
+    margin: 0;
+    height:100%;
+}
+
+button{
+    border: none;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    border-radius: .5em;
+    background-color: #9b74ce;
+    color: #0E0B16;
+    font-size: 1em;
+}
+
+button:hover{
+    background-color: #7253e4;
+}
+
+input{
+    padding: 0.5em 1em;
+    background-color: #E7DFDD;
+}
+
+textarea{
+    background-color: #b0aeb4;
+}
+
+/**********************
+      CHECKBOXES
+**********************/
+
+.checkbox-zone{
+    margin: 0.25em;
+    padding: 0.5em;
+}
+
+.checkbox-container{
+    cursor: pointer;
+    padding-left: 1.4em;
+    position: relative;
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.checkbox-container input{
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkbox-container:hover input ~ .checkbox-css{
+    background-color: #7253e4;
+}
+
+.checkbox-container input:checked ~ .checkbox-css{
+    background-color: #9b74ce;
+}
+
+.checkbox-css{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1.2em;
+    width: 1.2em;
+    background-color: #b0aeb4;
+}
+
+.checkbox-css:after{
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkbox-css:after{
+    display: block;
+}
+
+.checkbox-container .checkbox-css:after{
+    left: 0.35em;
+    top: 0.02em;
+    width: 0.4em;
+    height: 0.8em;
+    border: solid white;
+    border-width: 0 0.2em 0.2em 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+/**********************
+         RADIO
+**********************/
+
+.radio-label{
+    position: relative;
+    padding-left: 1.4em;
+    margin: .25em;
+    cursor: pointer;
+}
+
+.radio-label input{
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.radio-css{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1em;
+    width: 1em;
+    background-color: #b0aeb4;
+    border-radius: 50%;
+}
+
+.radio-label:hover input ~ .radio-css {
+    background-color: #7253e4;
+}
+
+.radio-label input:checked ~ .radio-css {
+    background-color: #9b74ce;
+}
+
+.radio-css:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.radio-label input:checked ~ .radio-css:after {
+    display: block;
+}
+
+.radio-label .radio-css:after {
+ 	top: 0.33em;
+	left: 0.33em;
+	width: 0.33em;
+	height: 0.33em;
+	border-radius: 50%;
+	background: #E7DFDD;
+}
+/**********************
+        HEADER
+**********************/
+
+#header{
+    background-color: #9b74ce;
+    padding: .5vw 2vw .5vw 2vw;
+    color: #E7DFDD;
+}
+
+#site-title{
+    font-size: 3em;
+}
+
+.header-link{
+    display:inline-block;
+    font-size: 1.5em;
+    margin-top: 0.5vw;
+}
+
+.header-link:link, .header-link:visited {
+    background-color: #9b74ce;
+    color: #0E0B16;
+    padding: 1vh 1vw;
+    text-decoration: none;
+  }
+  
+.header-link:hover, .header-link:active {
+    background-color: #7253e4;
+    color:#0E0B16;
+  }
+
+/**********************
+        CONTENT
+**********************/
+
+#all-of-it{
+    display: flex;
+    flex-direction: row;
+    justify-content:space-between;
+    height: 100%;
 }
 
 #main-content{
     width: 79%;
+    padding: 1em;
 }
+
+/**********************
+        SIDEBAR
+**********************/
 
 #sidebar{
     border-left: 2px solid black;
-    padding: 0.5em;
+    padding: 0.5em 0em 0 0.75em;
     width: 20%;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    background-color: #0E0B16;
 }
+
+#chat-zone{
+    margin: 0vw .5vw 0vw 0vw;
+    position:relative;
+    height: 50vh;
+    box-sizing: border-box;
+}
+
+#chat{
+    height:90%;
+    overflow:auto;
+}
+
+#chat-log{
+    background-color: #b0aeb4;
+    width:95%;
+    height:85%;
+}
+
+.chat-input {
+ max-width:75%;
+}
+
+.post-comment-button {
+
+}
+
+#new-card-details{
+    font-size: 1.2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 13em;
+}
+
+#card-text{
+    width: 50%;
+}
+
+#new-card-submit{
+    background-color: #9b74ce;
+    color: #0E0B16;
+    font-size: 1em;
+}
+
+#new-card-submit:hover{
+    background-color: #7253e4;
+}
+
+.selector{
+    display: inline-block;
+    position: relative;
+    width: 8em; 
+}
+
+.selector-selected {
+    background-color: #9b74ce;
+}
+
+.selector select{
+    display: none;
+}
+
+.selector-selected:after {
+    position: absolute;
+    content: "";
+    top: 14px;
+    right: 10px;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-color: #E7DFDD transparent transparent transparent;
+}
+
+.selector-selected.select-arrow-active:after {
+    border-color: transparent transparent #E7DFDD transparent;
+    top: 7px;
+  }
+
+.selected-items div,.selector-selected{
+    color: #E7DFDD;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-color: transparent transparent #6616ce transparent;
+    cursor: pointer;
+  }
+
+.selected-items {
+    position: absolute;
+    background-color: #9b74ce;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 99;
+  }
+
+.selected-items div:hover, .same-as-selected {
+    background-color: #7253e4;
+  }
+
+/**********************
+        INDEX
+**********************/
+
+#sessions{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#test{
+    text-align: left;
+}
+
+#session-list{
+    border: 2px solid grey;
+    padding: 1em;
+    background-color: #b0aeb4;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 40vw;
+}
+
+.session-listing{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.session-link{
+    padding: .25em;
+    font-size: 1.15em;
+    flex-grow: 1;
+}
+
+.delete-session-button {
+    font-weight: bold;
+    border-radius: 50%;
+    padding: .2em .6em;
+    margin: .2em;
+    font-size: small;
+}
+
+.session-link:link, .session-link:visited{
+    text-decoration: none;
+    color: #0E0B16;
+}
+
+.session-link:hover, .session-link:active{
+    background-color: #9b74ce;
+}
+
+#session-create{
+    font-size: 1.2em;
+}
+
+
+
+/**********************
+          GAME
+**********************/
+
+.card:hover.radio-label{
+ background-color: #7253e4;
+ color: #0E0B16;
+}
+
+/* .radio-label input:checked ~ .radio-css */
+
+input:checked + .card {
+    background-color: #9b74ce;
+    border: .5em solid #7253e4;
+    color: #0E0B16;
+}
+
+/**********************
+         CARDS
+**********************/
 
 .card{
     display: block;
     width: 10em;
     height: 15em;
-    border: 2px solid black;
+    border: 2px solid #9b74ce;
     padding: 0.75em 0.5em 0.75em 0.5em;
     text-align: center;
+    background-color: #0E0B16;
+    border-radius: .5em;
 }
 
 .card-box{
@@ -30,39 +407,40 @@ body{
     flex-wrap: wrap;
 }
 .card-block{
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
     margin: .5em;
+}
+
+.prompt_card{
+    background-color: #b0aeb4;
+    color: #0E0B16;
+}
+
+.button-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    width: 100%;
+}
+
+#play-button {
+    padding: 0.5em 5em;
+}
+
+/**********************
+          MISC
+**********************/
+
+.sub-header{
+    margin: .25em;
+    font-size: 2em;
+    color: #E7DFDD;
 }
 
 .hide{
     display:none;
 }
-
-#site-title{
-    font-size: 3em;
-}
-
-#all-of-it{
-    display: flex;
-    flex-direction: row;
-    justify-content:space-between;
-}
-
-#chat-zone{
-    position:relative;
-    height: 50vh;
-    box-sizing: border-box;
-}
-
-#chat{
-    height:90%;
-    overflow:auto;  
-    border: 2px solid grey;
-}
-
-#chat-log{
-    width:99%;
-    height:90%;
-}
-
-

@@ -3,9 +3,10 @@
 {% block content %}
     <p>Prompt Card:</p>
     <div class="card-box">
-    <div class="card-block">
-        <span class="card">{{ prompt_card.card_text }}</span>
-    </div></div>
+        <div class="card-block">
+            <span class="prompt_card card">{{ prompt_card.card_text }}</span>
+        </div>
+    </div>
     {% if judge_time %}
         <form method="POST" action="{% url 'judge' session %}"> {% csrf_token %}
             <div class="card-box">
@@ -18,8 +19,8 @@
     </div>
         {% if active_player.is_judge %}
             <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
-        </form>
         {% endif %}
+        </form>
     {% elif end_round %}
     <br>
         <p>Winning Card:</p>
@@ -35,8 +36,7 @@
                 <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
             </span>
         {% endfor %}
-        
-        </div><a class="button" href="{% url 'play' session %}">Back</a>
+        </div>
     {% endif %}
     {% include "game/judge_js.html" %}
 {% endblock %}

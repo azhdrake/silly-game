@@ -1,26 +1,41 @@
 {% extends 'game/base.html' %}
 {% load static %}
 {% block content %}
+    <div id="sessions">
+        <div id="test">
         {% if session_list %}
-            <p>Join a prexisting session:</p> 
-            {% for session in session_list %} 
-                <a href="{% url 'game' session.pk %}">{{session.name}}</a><br>
-            {% endfor %}
-            <p>Or make your own:</p>
+            <p class="sub-header">Join a prexisting session:</p>
+        <div id="session-list"> 
+            <form id="session-delete" method="POST" action="{% url 'index' %}">{% csrf_token %}
+                {% for session in session_list %} 
+                    <span class=session-listing>
+                        <a class="session-link" href="{% url 'game' session.pk %}">{{session.name}}</a> 
+                        <button onclick="return confirm('This will delete the session {{session.name}}. Are you sure you want to do this?');" type="submit" class="delete-session-button" name="delete-session" value="{{session.pk}}">X</button>
+                    </span>
+                {% endfor %}
+            </form>
+        </div>
+            <p class="sub-header">Or make your own:</p>
         {% else %}
-            <p>
+            <p class="sub-header">
                 It looks like there aren't any sessions, start a new one?
             </p>
         {% endif %}
-        <form method="POST" action="{% url 'index' %}">
+        <form id="session-create" method="POST" action="{% url 'index' %}">
             {% csrf_token %}
             <label for="name">Session name: </label><input type="text" name="name">
-            <div class="checkbox-field"> 
+            <div class="checkbox-zone"> 
                 {% for deck in decks %}
-                    <label for="{{ deck.name }}-checkbox">{{ deck.name }}</label><input type="checkbox" id="{{ deck.name }}-checkbox" name="decks" value="{{ deck.pk }}" {% if deck.pk is 1 %} checked="true" {% endif %}>
+                <span class="checkbox-container">
+                    <label class="checkbox-label" for="{{ deck.name }}-checkbox">{{ deck.name }}
+                    <input class="checkbox-field" type="checkbox" id="{{ deck.name }}-checkbox" name="decks" value="{{ deck.pk }}" {% if deck.pk is 1 %} checked="true" {% endif %}>
+                    <span class="checkbox-css"></span></label>
+                </span>
                 {% endfor %}
             </div>
-            <button id="start" name="start" value="start" type="submit">Start a new session</button>
+            <button id="start-btn" name="start" value="start" type="submit">Start a new session</button>
             <!-- TODO: Add deck selection -->
         </form>
+    </div>
+    </div>
 {% endblock %}

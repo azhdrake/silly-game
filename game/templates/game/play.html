@@ -3,7 +3,7 @@
 {% block content %}  
 <div class="card-box">
     <div class = "card-block">
-        <span class="prompt_card card" for="prompt_card-{{prompt_card.pk}}">{{ prompt_card.card_text }}</span>
+        <span class="prompt_card card">{{ prompt_card.card_text }}</span>
     </div>
 </div> 
     {% if active_player %} 
@@ -11,19 +11,21 @@
             {% if player == active_player %}
             <form method="POST" action="{% url 'judge' session %}"> 
                 {% csrf_token %}
-                <h1>Your - {{ player.nickname }} - Hand</h1>
+                <h1>Your hand, {{ player.nickname }}</h1>
                 <div class="card-box">
                 {% for card in hand %}
                     <span class="card-block">
-                        <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
-                        <input class="card-radio" type="radio" id="card-{{card.pk}}" name="noun_card" value="{{card.pk}}" required>
+                        <input class="card-radio radio-select hide" type="radio" id="card-{{card.pk}}" name="noun_card" value="{{card.pk}}" required>
+                        <label class="card radio-label" for="card-{{card.pk}}">{{ card.card_text }}
+                        <span class="radio-css hide"></span></label>
                     </span>
                 {% endfor %}
-                </div>
-                <input type="hidden" name ="player" value ="{{player.pk}}"><input type="hidden" name = "prompt_card" value ="{{prompt_card.pk}}">
                 {{ form.non_field_errors }}
                 {{ form.noun_card.errors }}
                 <button id="play-button" name="play-card" type="submit">Play</button>
+                </div>
+                <input type="hidden" name ="player" value ="{{player.pk}}"><input type="hidden" name = "prompt_card" value ="{{prompt_card.pk}}">
+                
             </form>
             {% endif %}
         {% endfor %}

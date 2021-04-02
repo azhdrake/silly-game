@@ -2,22 +2,33 @@
 <div id="new-card-zone">
     <form id="new-card-form"> 
         {% csrf_token %}
-            <h2>Make a new card!</h2>
-            <label for="card_text">New Card Text</label><br>
-            <textarea rows="3" cols="25" id="new-card" name="card_text" required></textarea>
+            <div class="sub-header">Make a new card!</div>
             <div id="new-card-details">
-                <input type="radio" id="noun-card" name="is_noun"  value="true" checked><label for="noun-card">Noun Card</label>
-                <input type="radio" id="prompt-card" name="is_noun" value="false"><label for="prompt-card">Prompt Card</label> <br>
-                <label for="deck">Deck</label>
-                <select name="deck" id="deck-select">
-                    {% for deck in decks %}
-                    <option name="deck" value="{{deck.pk}}">{{deck.name}}</option>
-                    {% endfor %}
-                    <!-- TODO: add num_blank option when "prompt card" is selected -->
-                </select>
+                <div class="card-text-enter">
+                    <label id="card-text" for="card_text">New Card Text</label><br>
+                    <textarea rows="3" cols="25" id="new-card" name="card_text" required></textarea>
+                </div>
+                <div class="radios">
+                    <label class="radio-label" for="noun-card">Noun Card<input type="radio" class="radio-select" id="noun-card" name="is_noun" value="true" checked><span class=radio-css></span></label>
+                    <label class="radio-label" for="prompt-card">Prompt Card<input type="radio" class="radio-select" id="prompt-card" name="is_noun" value="false"><span class=radio-css></span></label> 
+                </div>
+                <div class="deck-select-zone">
+                    <label for="deck">Deck:</label>
+                    <span class="selector">
+                        <select name="deck" id="deck-select">
+                            {% for deck in decks %}
+                            <option name="deck" value="{{deck.pk}}">{{deck.name}}</option>
+                            {% endfor %}
+                            <!-- TODO: add num_blank option when "prompt card" is selected -->
+                        </select>
+                    </span>
+                </div>
+                <div id="the-button-gets-its-own-div">
+                    <button id="new-card-submit" type="submit">Submit</button>
+                </div>
             </div>
-            <button id="new-card-submit" type="submit">Submit</button>
         </form> 
+        {% include "game/selector_js.html" %}
     </div>
 </div>
 {% endblock %}
