@@ -19,7 +19,7 @@ def index(request):
             if form.is_valid():
                 new_session = form.save()
                 
-                #make and populate the deck
+                # make and populate the deck
                 session_decks = dict(request.POST)["decks"]
                 deck_pks = []
                 for select_deck in session_decks:

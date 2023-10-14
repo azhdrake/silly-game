@@ -6,16 +6,7 @@
             {% if active_player and player == active_player %}
                 <h1>You, {{ player.nickname }}, are ready to play!</h1>
             {% else %}
-                <h1>{{ player.nickname }} is ready to play!</h1>
-                {% if player.nickname == "Deck" %}
-                <div class="card-box">
-                        {% for card in hand %}  
-                            <span class="card-block">
-                            <span class="card" for="card-{{card.pk}}">{{ card.card_text }}</span>
-                            </span>
-                        {% endfor %}
-                        </div>
-                {% endif %}
+                <h1>{{ player.nickname }} is ready to play!</h1>                
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -36,5 +27,6 @@
         <a class="button" href="{% url 'play' session %}">Play</a>
         {% endif %}
     </form>
+    {% include "game/game_js.html" %}
     
 {% endblock %}

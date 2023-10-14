@@ -8,17 +8,23 @@
         </div>
     </div>
     {% if judge_time %}
-        <form method="POST" action="{% url 'judge' session %}"> {% csrf_token %}
-            <div class="card-box">
+        {% if active_player.is_judge %}        
+            <form method="POST" action="{% url 'judge' session %}"> {% csrf_token %}
+                <div class="card-box">
+                    {% for card in noun_cards %} 
+                        <span class="card-block">
+                            <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
+                            <input class="card-radio" type="radio" id="card-{{card.pk}}" name="winning_card" value="{{card.pk}}" required>
+                        </span>
+                    {% endfor %}
+                    <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
+                </div>
+        {% else %}
             {% for card in noun_cards %} 
-            <span class="card-block">
-                <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
-                <input class="card-radio" type="radio" id="card-{{card.pk}}" name="winning_card" value="{{card.pk}}" required>
-            </span>
-        {% endfor %}
-    </div>
-        {% if active_player.is_judge %}
-            <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
+                <span class="card-block">
+                    <div class="card">{{ card.card_text }}</label>
+                </span>
+            {% endfor %}                
         {% endif %}
         </form>
     {% elif end_round %}
