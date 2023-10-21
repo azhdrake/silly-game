@@ -19,27 +19,32 @@
                     {% endfor %}
                     <button id="judge-button" name="judge-button" type="submit">CHOOSE</button>
                 </div>
+            </form>
         {% else %}
-            {% for card in noun_cards %} 
-                <span class="card-block">
-                    <div class="card">{{ card.card_text }}</label>
-                </span>
-            {% endfor %}                
-        {% endif %}
-        </form>
+            <div class="card-box">
+                {% for card in noun_cards %}
+                    <span class="card-block">
+                        <div class="card">{{ card.card_text }}</div>
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}        
     {% elif end_round %}
-    <br>
-        <p>Winning Card:</p>
-        <span class="card-block">
-            <span class="card" for="card-{{card.pk}}">{{ winning_card.card_text }}</span>
-            <span class="winning_player">{{winning_player}}</span>
-            <a class="button" method="POST" name="prev_round" value="{{winning_card.pk}}" href="{% url 'play' session %}">Next Round</a>
-        </span>
+        <div class="card-box"> 
+            <span>
+                <p>Winning Card:</p>
+                <span class="card-block">
+                    <span class="card" for="card-{{card.pk}}">{{ winning_card.card_text }}</span>
+                    <span class="winning_player">{{ winning_player }}</span>
+                    <a class="button" method="POST" name="prev_round" value="{{winning_card.pk}}" href="{% url 'play' session %}">Next Round</a>
+                </span>
+            </span>
+        </div>
     {% else %}
         <div class="card-box">
         {% for card in noun_cards %} 
             <span class="card-block">
-                <label class="card" for="card-{{card.pk}}">{{ card.card_text }}</label>
+                <div class="card" for="card-{{card.pk}}">{{ card.card_text }}</div>
             </span>
         {% endfor %}
         </div>

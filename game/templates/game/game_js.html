@@ -1,0 +1,36 @@
+{% block game_javascript %}
+<script>
+    
+    /***************************  
+          Misc Game Stuff 
+    ****************************/ 
+    session_id = "{{ session }}"
+
+    if(session_id){
+        const PlayerJoinSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/join/'
+            + session_id
+            + '/'
+        );
+
+        PlayerJoinSocket.onmessage = function(event){
+            if(location.pathname.includes("/game/")){
+                window.location.href = "{% url 'game' session %}"
+            }
+        }
+
+        PlayerJoinSocket.onclose = function(event){
+            console.error("PlayerJoinSocket socket closed unexpectedly");
+        }
+
+        $("#join").on('click', function(event){
+            PlayerJoinSocket.send(JSON.stringify({
+                "message":"refresh"
+            }));
+        })
+    }
+
+</script>
+{% endblock %}
