@@ -1,0 +1,40 @@
+{% block game_javascript %}
+<script>
+    
+    /********************************************  
+          Session creation / deletion Stuff 
+    *********************************************/ 
+
+    session_id = "{{ session }}"
+
+    if(!session_id){
+        const SessionSelectSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/sessionselect/'
+        );
+
+        SessionSelectSocket.onmessage = function(event){
+            window.location.href = "{% url 'index' %}"
+        }
+
+        SessionSelectSocket.onclose = function(event){
+            console.error("SessionSelect socket closed unexpectedly");
+        }
+
+        $("#start-btn").on('click', function(event){
+            SessionSelectSocket.send(JSON.stringify({
+                "message":"refresh"
+            }));
+        })        
+
+        $(".delete-session-button").on('click', function(event){
+            SessionSelectSocket.send(JSON.stringify({
+                "message":"refresh"
+            }));
+        })
+    }
+    
+
+</script>
+{% endblock %}

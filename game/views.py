@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.contrib.sessions.models import Session as Cookie
@@ -19,7 +19,7 @@ def index(request):
             if form.is_valid():
                 new_session = form.save()
                 
-                #make and populate the deck
+                # make and populate the deck
                 session_decks = dict(request.POST)["decks"]
                 deck_pks = []
                 for select_deck in session_decks:
@@ -79,7 +79,6 @@ def game(request, session_pk):
                     new_player.is_judge = True
 
                 new_player.save()
-                print(new_player)
 
     decks = Deck.objects.order_by("name")
     players = get_players(player_list)
@@ -92,34 +91,41 @@ def game(request, session_pk):
     return render(request, 'game/game.html', {"active_player":active_player, 'players':players, "decks":decks, "session":session_pk, "form":new_player_form})
 
 def play(request, session_pk):
-    prompt_card = None
     # sets up the play room 
-    decks = Deck.objects.order_by("pk")
     deck = get_object_or_404(Player, is_deck=True, session=session_pk)
-    prompt_cards = PromptCard.objects.filter(won_by=deck)
-    active_card = active_player = judge = None
-    is_judge = False
     session = get_object_or_404(Session, pk=session_pk)
+    decks = Deck.objects.order_by("pk")
+    prompt_cards = PromptCard.objects.filter(won_by=deck)
     player_list = Player.objects.filter(session=session_pk)
+    active_card = active_player = judge_player = prompt_card = None
+
+    active_cards = PromptCard.objects.filter(is_active=True)
 
     for player in player_list:
         if player.is_judge:
-            judge = player
+            judge_player = player
+        
+        for card in active_cards:
+            if card.won_by == player and player != deck:
+                card.is_active = False
+                card.save()
+                active_card = False
 
     # checks for active prompt and activates one if needed 
     for card in prompt_cards:
-        if card.is_active == True:
+        if card.is_active == True:            
             prompt_card = card
             active_card = True
 
-    if session.game_stage == WINNER:
-        winning_card = get_object_or_404(NounCard, with_prompt=prompt_card)
-        winning_player = winning_card.in_hand
+    if not active_card:
+        if(len(prompt_cards) > 0):
+            card_pos = randint(0, len(prompt_cards) - 1)
+            prompt_card = prompt_cards[card_pos]
+            prompt_card.is_active = True
+            prompt_card.save()
+            active_card = True
 
-        prompt_card.won_by = winning_player
-        prompt_card.is_active = False
-        prompt_card.save()
-        
+    if session.game_stage == WINNER:        
         session.game_stage = CARD_SELECT
         session.save()
 
@@ -127,23 +133,17 @@ def play(request, session_pk):
 
         player_list = list(player_list)
 
-        judge_index = player_list.index(judge)
-        judge.is_judge = False
-        judge.save()
+        judge_index = player_list.index(judge_player)
+        judge_player.is_judge = False
+        judge_player.save()
         if judge_index + 1 < len(player_list):
-            judge = player_list[judge_index + 1]
-            judge.is_judge = True
-            judge.save()
+            judge_player = player_list[judge_index + 1]
+            judge_player.is_judge = True
+            judge_player.save()
         else:
-            judge = player_list[1]
-            judge.is_judge = True
-            judge.save()
-
-    if not active_card:
-        card_pos = randint(0, len(prompt_cards) - 1)
-        prompt_card = prompt_cards[card_pos]
-        prompt_card.is_active = True
-        prompt_card.save()
+            judge_player = player_list[1]
+            judge_player.is_judge = True
+            judge_player.save()
 
     players = get_players(player_list)
 
@@ -163,7 +163,6 @@ def judge(request, session_pk):
     player_list = Player.objects.filter(session=session_pk)
     active_player = prompt_card = winning_card = winning_player = None
     end_round = False
-    deck = get_object_or_404(Player, is_deck=True, session=session_pk)
     session = get_object_or_404(Session, pk=session_pk)
     play_card_form = PlayCardForm
 
@@ -174,7 +173,9 @@ def judge(request, session_pk):
             player = get_object_or_404(Player, pk=form.cleaned_data["player"])
             if not player.has_played: # makes sure player doesn't play twice
                 noun_card = get_object_or_404(NounCard, pk=form.cleaned_data["noun_card"])
-                prompt_card = get_object_or_404(PromptCard, pk=form.cleaned_data["prompt_card"])               
+                prompt_card = get_object_or_404(PromptCard, pk=form.cleaned_data["prompt_card"])    
+
+                print(prompt_card.card_text)           
 
                 noun_card.with_prompt = prompt_card
                 noun_card.save()
@@ -194,7 +195,11 @@ def judge(request, session_pk):
 
     # gets cards for context
     if(not prompt_card):
-        prompt_card = get_object_or_404(PromptCard, is_active=True, won_by=deck)
+        prompt_cards = get_list_or_404(PromptCard, is_active=True)
+        for card in prompt_cards:
+            for player in player_list:
+                if card.won_by == player:
+                    prompt_card = card
 
     noun_cards = NounCard.objects.filter(with_prompt=prompt_card)
 
@@ -204,28 +209,26 @@ def judge(request, session_pk):
     else:
         judge_time = False
 
-    if session.game_stage == WINNER:
-        judge_time = False
-        end_round = True
-
-        winning_card = get_object_or_404(NounCard, with_prompt=prompt_card)
-        winning_player = winning_card.in_hand
-
     if "judge-button" in request.POST:
         # the judge chooses a winner, retires the prompt card
 
         winning_card_pk = request.POST["winning_card"]
         winning_card = get_object_or_404(NounCard, pk=winning_card_pk)
-        winning_player = winning_card.in_hand
 
         session.game_stage = WINNER
         session.save()
 
         for card in noun_cards:
-            # removes card from player hand and removes it's association with the prompt if it is not the winner
+            # removes card from player hand and removes it's association with the prompt if it is not the winner            
+            if card == winning_card:
+                prompt_card.won_by = card.in_hand
+                prompt_card.save()
+
             card.in_hand = None
+
             if card != winning_card:
                 card.with_prompt = None
+
             card.save()
 
         for player in players:
@@ -234,6 +237,13 @@ def judge(request, session_pk):
 
         end_round = True
         judge_time = False
+
+    if session.game_stage == WINNER:
+        judge_time = False
+        end_round = True
+
+        winning_card = get_object_or_404(NounCard, with_prompt=prompt_card)
+        winning_player = prompt_card.won_by
 
     for player in player_list:
         current_cookie = Cookie.objects.get(session_key=request.session.session_key)
