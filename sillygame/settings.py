@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '8ob-ptr=97w_9#mn%9$8%&^3e!yp0e5)bp7i%%wb5^9_6mc%f@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['gryph.fourisland.com']
 
 
 # Application definition
@@ -78,8 +78,11 @@ ASGI_APPLICATION = 'sillygame.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'silly_game',
+        'USER': 'silly_game',
+        'PASSWORD': 'c66eddedd297d10edbcbe3fb1f8c84b0',
+        'HOST': 'localhost',
     }
 }
 
