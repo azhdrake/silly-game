@@ -121,6 +121,10 @@ def play(request, session_pk):
         if(len(prompt_cards) > 0):
             card_pos = randint(0, len(prompt_cards) - 1)
             prompt_card = prompt_cards[card_pos]
+            while prompt_card.num_blanks > 1:
+                # TODO Make this less hacky
+                card_pos = randint(0, len(prompt_cards) - 1)
+                prompt_card = prompt_cards[card_pos]
             prompt_card.is_active = True
             prompt_card.save()
             active_card = True
